@@ -14,7 +14,7 @@ async def get_bytes(url):
 
 app = Starlette()
 
-path = Path('/pizza-classifier')
+path = Path('/models')
 classes = ['capricciosa', 'diavola']
 data = ImageDataBunch.single_from_classes(path, classes, tfms=get_transforms(), size=224).normalize(imagenet_stats)
 learn = create_cnn(data, models.resnet34)
