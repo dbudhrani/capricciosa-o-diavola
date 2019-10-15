@@ -1,6 +1,6 @@
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
-from fastai.vision import ImageDataBunch, create_cnn, open_image, get_transforms, models, imagenet_stats
+from fastai.vision import ImageDataBunch, cnn_learner, open_image, get_transforms, models, imagenet_stats
 from pathlib import Path
 from io import BytesIO
 import sys
@@ -16,10 +16,10 @@ app = Starlette()
 
 path = Path('/models')
 classes = ['capricciosa', 'diavola']
-data = ImageDataBunch.single_from_classes(path, classes, tfms=get_transforms(), size=224).normalize(imagenet_stats)
-learn = create_cnn(data, models.resnet34)
+data = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=224).normalize(imagenet_stats)
+learn = cnn_learner(data, models.resnet34)
 
-@app.route('/classify-url', methods=['GET']):
+@app.route('/classify-url', methods=['GET'])
 async def classify_url(request):
   bytes = await get_bytes(request.query_params['url'])
   return predict_image_from_bytes(bytes)
