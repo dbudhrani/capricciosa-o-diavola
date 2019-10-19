@@ -3,7 +3,7 @@ from starlette.responses import JSONResponse
 from fastai.vision import ImageDataBunch, cnn_learner, open_image, get_transforms, models, imagenet_stats
 from pathlib import Path
 from io import BytesIO
-import sys
+import sys, os
 import uvicorn
 import aiohttp
 
@@ -37,5 +37,6 @@ def predict_image_from_bytes(bytes):
 
 if __name__ == '__main__':
   if 'serve' in sys.argv:
-    uvicorn.run(app, host='0.0.0.0', port=8008)
+    port = int(os.environ.get('PORT', 8008))
+    uvicorn.run(app, host='0.0.0.0', port=port)
 
