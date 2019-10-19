@@ -1,8 +1,9 @@
 from starlette.applications import Starlette
-from starlette.responses import JSONResponse
+from starlette.responses import HTMLResponse
 from fastai.vision import ImageDataBunch, cnn_learner, open_image, get_transforms, models, imagenet_stats
 from pathlib import Path
 from io import BytesIO
+import torch
 import sys, os
 import uvicorn
 import aiohttp
@@ -26,14 +27,27 @@ async def classify_url(request):
 
 def predict_image_from_bytes(bytes):
     img = open_image(BytesIO(bytes))
-    losses = img.predict(learner)
-    return JSONResponse({
-        "predictions": sorted(
-            zip(cat_learner.data.classes, map(float, losses)),
+    pred_class,pred_idx,outputs = learn.predict(img)
+    formatted_outputs = ["{:.1f}%".format(value) for value in [x * 100 for x in torch.nn.functional.softmax(outputs, dim=0)]]
+    pred_probs = sorted(
+            zip(learn.data.classes, map(str, formatted_outputs)),
             key=lambda p: p[1],
             reverse=True
         )
-    })
+    img_data = encode(img)
+    
+    return HTMLResponse(
+        """
+        <html>
+           <body>
+             <p>Prediction: <b>%s</b></p>
+             <p>Confidence: %s</p>
+           </body>
+          <figure class="figure">
+            <img src="data:image/png;base64, %s" class="figure-img img-thumbnail input-image">
+          </figure>
+        </html>
+    """ %(pred_class.upper(), pred_probs, img_data))
 
 if __name__ == '__main__':
   if 'serve' in sys.argv:
