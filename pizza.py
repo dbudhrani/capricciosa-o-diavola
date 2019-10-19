@@ -44,7 +44,7 @@ def predict_image_from_bytes(bytes):
              <p>Confidence: %s</p>
            </body>
         </html>
-    """ % (pred_class.upper(), pred_probs))
+    """ % (classes[pred_idx], pred_probs))
 
 if __name__ == '__main__':
   if 'serve' in sys.argv:
