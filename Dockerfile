@@ -11,7 +11,7 @@ RUN pip install fastai
 RUN pip install starlette uvicorn python-multipart aiohttp
 
 ADD pizza.py pizza.py
-ADD models/export.pkl models/export.pkl
+ADD models/capricciosa-o-diavola.pkl models/capricciosa-o-diavola.pkl
 
 # Run it once to trigger resnet download
 RUN python pizza.py
