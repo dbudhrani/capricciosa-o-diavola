@@ -1,6 +1,7 @@
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
-from fastai.vision import ImageDataBunch, cnn_learner, open_image, get_transforms, models, imagenet_stats
+from fastai import *
+from fastai.vision import *
 from pathlib import Path
 from io import BytesIO
 import torch
