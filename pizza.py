@@ -16,10 +16,10 @@ async def get_bytes(url):
 
 app = Starlette()
 
-path = Path('/models')
+path = Path('models/')
 classes = ['capricciosa', 'diavola']
 data = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=224).normalize(imagenet_stats)
-learn = cnn_learner(data, models.resnet34)
+learn = load_learner(path, file='capricciosa-o-diavola.pkl')
 
 @app.route('/classify-url', methods=['GET'])
 async def classify_url(request):
@@ -29,13 +29,8 @@ async def classify_url(request):
 def predict_image_from_bytes(bytes):
     img = open_image(BytesIO(bytes))
     pred_class,pred_idx,outputs = learn.predict(img)
-    formatted_outputs = ["{:.1f}%".format(value) for value in [x * 100 for x in torch.nn.functional.softmax(outputs, dim=0)]]
-    pred_probs = sorted(
-            zip(learn.data.classes, map(str, formatted_outputs)),
-            key=lambda p: p[1],
-            reverse=True
-        )
-    
+    confidence = '{}%'.format(outputs[pred_idx] * 100)
+
     return HTMLResponse(
         """
         <html>
@@ -44,7 +39,7 @@ def predict_image_from_bytes(bytes):
              <p>Confidence: %s</p>
            </body>
         </html>
-    """ % (classes[pred_idx], pred_probs))
+    """ % (classes[pred_idx], confidence))
 
 if __name__ == '__main__':
   if 'serve' in sys.argv:
