@@ -52,14 +52,14 @@ async def upload(request):
 def predict_image_from_bytes(bytes):
     img = open_image(BytesIO(bytes))
     pred_class,pred_idx,outputs = learn.predict(img)
-    confidence = '{}%'.format(torch.round(((outputs[pred_idx] * 100) * 10**2) / 10**2))
+    confidence = round(outputs[pred_idx].item() * 100, 2)
 
     return HTMLResponse(
         """
         <html>
            <body>
              <p>Prediction: <b>%s</b></p>
-             <p>Confidence: %s</p>
+             <p>Confidence: %s%%</p>
            </body>
         </html>
     """ % (classes[pred_idx], confidence))
