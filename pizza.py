@@ -21,10 +21,33 @@ classes = ['capricciosa', 'diavola']
 data = ImageDataBunch.single_from_classes(path, classes, ds_tfms=get_transforms(), size=224).normalize(imagenet_stats)
 learn = load_learner(path, file='capricciosa-o-diavola.pkl')
 
+@app.route("/")
+def form(request):
+    return HTMLResponse(
+        """
+        Is your pizza a capricciosa or a diavola?
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            Select image to upload:
+            <input type="file" name="file">
+            <input type="submit" value="Upload Image">
+        </form>
+        Or submit a URL:
+        <form action="/classify-url" method="get">
+            <input type="url" name="url">
+            <input type="submit" value="Fetch and analyze image">
+        </form>
+    """)
+
 @app.route('/classify-url', methods=['GET'])
 async def classify_url(request):
   bytes = await get_bytes(request.query_params['url'])
   return predict_image_from_bytes(bytes)
+
+@app.route("/upload", methods=["POST"])
+async def upload(request):
+    data = await request.form()
+    bytes = await (data["file"].read())
+    return predict_image_from_bytes(bytes)
 
 def predict_image_from_bytes(bytes):
     img = open_image(BytesIO(bytes))
